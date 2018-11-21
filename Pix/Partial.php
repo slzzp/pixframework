@@ -166,6 +166,8 @@ class Pix_Partial
      */
     public function partial($file, $data = null, $options = null)
     {
+        $cache = null;
+
         if ($data instanceof Pix_Partial) {
             $data = $data->_data;
         } else {
