@@ -41,6 +41,7 @@ class Pix_Array_Volume_ResultSet implements Iterator, countable
             ->limit($this->_chunk)
             ->rewind()
         );
+
         return $this;
     }
 
@@ -56,6 +57,7 @@ class Pix_Array_Volume_ResultSet implements Iterator, countable
         if ($this->_simple_mode) {
             return $this->_last_row;
         }
+
         return new Pix_Array_Volume_Row($this->_last_row, $this);
     }
 
@@ -67,6 +69,7 @@ class Pix_Array_Volume_ResultSet implements Iterator, countable
     public function next()
     {
         $this->_array->next();
+
         if (0 !== $this->_limit and !$this->valid()) {
             $this->_array = Pix_Array::factory($this->_origin_array->after($this->_origin_array->getVolumePos($this->_last_row))->limit($this->_chunk)->rewind());
         }
@@ -77,6 +80,7 @@ class Pix_Array_Volume_ResultSet implements Iterator, countable
         if (!is_null($this->_limit) and ($this->_pos >= $this->_offset + $this->_limit)) {
             return false;
         }
+
         return $this->_array->valid();
     }
 
@@ -84,6 +88,7 @@ class Pix_Array_Volume_ResultSet implements Iterator, countable
     {
         $rs = clone $this;
         $rs->_offset = $offset;
+
         return $rs;
     }
 
@@ -91,6 +96,7 @@ class Pix_Array_Volume_ResultSet implements Iterator, countable
     {
         $rs = clone $this;
         $rs->_after = $row;
+
         return $rs;
     }
 
@@ -98,6 +104,7 @@ class Pix_Array_Volume_ResultSet implements Iterator, countable
     {
         $rs = clone $this;
         $rs->_limit = $limit;
+
         return $rs;
     }
 
@@ -105,16 +112,22 @@ class Pix_Array_Volume_ResultSet implements Iterator, countable
     {
         if ($this->_pos < $this->_offset) {
             $this->_pos ++;
+
             return false;
         }
+
         if (is_null($this->_limit)) {
             $this->_pos ++;
+
             return true;
         }
+
         if ($this->_limit + $this->_offset > $this->_pos) {
             $this->_pos ++;
+
             return true;
         }
+
         return false;
     }
 
@@ -139,6 +152,7 @@ class Pix_Array_Volume_ResultSet implements Iterator, countable
         if ($this->_after) {
             return count($this->_origin_array->after($this->_after));
         }
+
         return count($this->_origin_array);
     }
 }
