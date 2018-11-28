@@ -26,6 +26,7 @@ class Pix_Table_Db_Adapter_AmazonDynamoDb extends Pix_Table_Db_Adapter_Abstract
         if (is_null($this->_db)) {
             $this->_db = new AmazonDynamoDB();
         }
+
         return $this->_db;
     }
 
@@ -46,6 +47,7 @@ class Pix_Table_Db_Adapter_AmazonDynamoDb extends Pix_Table_Db_Adapter_Abstract
         if (in_array($table->_columns[$col]['type'], array('int', 'bigint', 'tinyint'))) {
             return AmazonDynamoDB::TYPE_NUMBER;
         }
+
         return AmazonDynamoDB::TYPE_STRING;
     }
 
@@ -63,20 +65,25 @@ class Pix_Table_Db_Adapter_AmazonDynamoDb extends Pix_Table_Db_Adapter_Abstract
         $items = array();
         $excepted = array();
         $primary_values = array();
+
         foreach ($table->getPrimaryColumns() as $col) {
             if (!isset($keys_values[$col])) {
                 throw new Pix_Table_Exception("沒有提供 {$col} column 的值");
             }
+
             $excepted[$col] = array('Exists' => false);
         }
+
         foreach ($keys_values as $key => $value) {
             $items[$key] = array($this->_getColumnType($table, $key) => $value);
         }
+
         $put_response = $db->put_item(array(
             'TableName' => $table->getTableName(),
             'Item' => $items,
             'Expected' => $excepted,
         ));
+
         if ($put_response->status == 400 and $put_response->body->__type == 'com.amazonaws.dynamodb.v20111205#ConditionalCheckFailedException') {
             throw new Pix_Table_DuplicateException();
         }
@@ -101,6 +108,7 @@ class Pix_Table_Db_Adapter_AmazonDynamoDb extends Pix_Table_Db_Adapter_Abstract
         $db = $this->_getDb();
         $primary_keys = $table->getPrimaryColumns();
         $get_key = array();
+
         if (count($primary_keys) == 1) {
             $get_key['HashKeyElement'] = array($this->_getColumnType($table, $primary_keys[0]) => $primary_values[0]);
         } elseif (count($primary_keys) == 2) {
@@ -109,22 +117,28 @@ class Pix_Table_Db_Adapter_AmazonDynamoDb extends Pix_Table_Db_Adapter_Abstract
         } else {
             throw new Pix_Table_Exception("AmazonDynamoDB 只支援最多兩個 Primary Key 的 Table");
         }
+
         $get_response = $db->get_item(array(
             'TableName' => $table->getTableName(),
             'Key' => $get_key,
         ));
+
         if (200 != $get_response->status) {
             throw new Pix_Table_Exception("AmazonDynamoDB: " . $get_response->body->Message);
         }
+
         if (!$item = $get_response->body->Item) {
             return null;
         }
+
         $ret = array();
+
         foreach ($table->_columns as $name => $col) {
             if ($item->{$name}) {
                 $ret[$name] = strval($item->{$name}->S);
             }
         }
+
         return $ret;
     }
 
@@ -142,6 +156,7 @@ class Pix_Table_Db_Adapter_AmazonDynamoDb extends Pix_Table_Db_Adapter_Abstract
         $primary_values = $row->getPrimaryValues();
         $primary_keys = $table->getPrimaryColumns();
         $get_key = array();
+
         if (count($primary_keys) == 1) {
             $get_key['HashKeyElement'] = array($this->_getColumnType($table, $primary_keys[0]) => $primary_values[0]);
         } elseif (count($primary_keys) == 2) {
@@ -150,6 +165,7 @@ class Pix_Table_Db_Adapter_AmazonDynamoDb extends Pix_Table_Db_Adapter_Abstract
         } else {
             throw new Pix_Table_Exception("AmazonDynamoDB 只支援最多兩個 Primary Key 的 Table");
         }
+
         $get_response = $db->delete_item(array(
             'TableName' => $table->getTableName(),
             'Key' => $get_key,
@@ -174,6 +190,7 @@ class Pix_Table_Db_Adapter_AmazonDynamoDb extends Pix_Table_Db_Adapter_Abstract
         $db = $this->_getDb();
 
         $condictions = $search->getSearchCondictions();
+
         if (count($condictions) == 0) { // 完全沒有條件就是 scan table
             $options = array();
             $options['TableName'] = $table->getTableName();
@@ -191,6 +208,7 @@ class Pix_Table_Db_Adapter_AmazonDynamoDb extends Pix_Table_Db_Adapter_Abstract
             if ('map' != $condictions[0][0]) {
                 throw new Pix_Table_Exception("不支援的 search 條件");
             }
+
             // 只能是 Primary Key 的第一個
             if ($primary_keys[0] != $condictions[0][1]) {
                 throw new Pix_Table_Exception("不支援的 search 條件");
@@ -220,6 +238,7 @@ class Pix_Table_Db_Adapter_AmazonDynamoDb extends Pix_Table_Db_Adapter_Abstract
                         array($this->_getColumnType($table, $primary_keys[1]) => $row->{$primary_keys[1]}),
                     ),
                 );
+
                 $options['ScanIndexForward'] = false;
             }
 
@@ -236,17 +255,21 @@ class Pix_Table_Db_Adapter_AmazonDynamoDb extends Pix_Table_Db_Adapter_Abstract
         if (200 != $response->status) {
             throw new Pix_Table_Exception("AmazonDynamoDB: " . $get_response->body->Message);
         }
+
         $ret = array();
 
         foreach ($response->body->Items[0] as $item) {
             $row = array();
+
             foreach ($table->_columns as $name => $col) {
                 if ($item->{$name}) {
                     $row[$name] = strval($item->{$name}->S);
                 }
             }
+
             $ret[] = $row;
         }
+
         return $ret;
     }
 
@@ -268,6 +291,7 @@ class Pix_Table_Db_Adapter_AmazonDynamoDb extends Pix_Table_Db_Adapter_Abstract
         $primary_values = $row->getPrimaryValues();
         $primary_keys = $table->getPrimaryColumns();
         $get_key = array();
+
         if (count($primary_keys) == 1) {
             $get_key['HashKeyElement'] = array($this->_getColumnType($table, $primary_keys[0]) => $primary_values[0]);
         } elseif (count($primary_keys) == 2) {
@@ -278,13 +302,16 @@ class Pix_Table_Db_Adapter_AmazonDynamoDb extends Pix_Table_Db_Adapter_Abstract
         }
 
         $updates = array();
+
         foreach ($data as $key => $value) {
             $updates[$key] = array(
                 'Action' => AmazonDynamoDB::ACTION_PUT,
                 'Value' => array($this->_getColumnType($table, $key) => $value),
             );
         }
+
         $db = $this->_getDb();
+
         $db->update_item(array(
             'TableName' => $table->getTableName(),
             'Key' => $get_key,

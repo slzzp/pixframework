@@ -34,6 +34,7 @@ class Pix_Table_Db_Adapter_MsSQL extends Pix_Table_Db_Adapter_MysqlCommon
         if (Pix_Table::$_log_groups[Pix_Table::LOG_QUERY]) {
             Pix_Table::debug(sprintf("[%s]\t%40s", strval($this->_link), $sql));
         }
+
         // TODO: log sql query
         if ($comment = Pix_Table::getQueryComment()) {
             $sql = trim($sql, '; ') . ' #' . $comment;
@@ -41,6 +42,7 @@ class Pix_Table_Db_Adapter_MsSQL extends Pix_Table_Db_Adapter_MysqlCommon
 
         $starttime = microtime(true);
         $res = mssql_query($sql, $this->_link);
+
         if (($t = Pix_Table::getLongQueryTime()) and ($delta = (microtime(true) - $starttime)) > $t) {
             Pix_Table::debug(sprintf("[%s]\t%s\t%40s", strval($this->_link), $delta, $sql));
         }
@@ -48,6 +50,7 @@ class Pix_Table_Db_Adapter_MsSQL extends Pix_Table_Db_Adapter_MysqlCommon
         if ($res === false) {
             throw new Exception("SQL Error: {$this->_link} SQL: $sql");
         }
+
         return new Pix_Table_Db_Adapter_MsSQL_Result($res);
     }
 
@@ -77,8 +80,10 @@ class Pix_Table_Db_Adapter_MsSQL extends Pix_Table_Db_Adapter_MysqlCommon
                 if (!$column['size']) {
                     throw new Exception('you should set the option `size`');
                 }
+
                 $s .= '(' . $column['size'] . ')';
             }
+
             $s .= ' ';
 
             if ($column['unsigned']) {
@@ -104,9 +109,11 @@ class Pix_Table_Db_Adapter_MsSQL extends Pix_Table_Db_Adapter_MysqlCommon
 
         $s = 'PRIMARY KEY ' ;
         $index_columns = array();
+
         foreach ((is_array($table->_primary) ? $table->_primary : array($table->_primary)) as $pk) {
             $index_columns[] = $this->column_quote($pk);
         }
+
         $s .= '(' . implode(', ', $index_columns) . ")\n";
         $column_sql[] = $s;
 
@@ -116,12 +123,15 @@ class Pix_Table_Db_Adapter_MsSQL extends Pix_Table_Db_Adapter_MysqlCommon
             } else {
                 $s = 'KEY ' . $this->column_quote($name);
             }
+
             $columns = $options['columns'];
 
             $index_columns = array();
+
             foreach ($columns as $column_name) {
                 $index_columns[] = $this->column_quote($column_name);
             }
+
             $s .= '(' . implode(', ', $index_columns) . ') ';
 
             $column_sql[] = $s;
@@ -145,14 +155,18 @@ class Pix_Table_Db_Adapter_MsSQL extends Pix_Table_Db_Adapter_MysqlCommon
             // from http://php.net/manual/en/function.mssql-query.php vollmer at ampache dot org
             $value = str_replace("'", "''", $value);
             $value = str_replace("\0", "[NULL]", $value);
+
             return "'" . strval($value) . "'";
         }
+
         if ($table->isNumbericColumn($column_name)) {
             return intval($value);
         }
+
         if (!is_scalar($value)) {
             trigger_error("{$_SERVER['SERVER_NAME']}{$_SERVER['REQUEST_URI']} 的 column `{$column_name}` 格式不正確: " . gettype($value), E_USER_WARNING);
         }
+
         return $this->quoteWithColumn($table, $value, null);
     }
 
@@ -172,9 +186,11 @@ class Pix_Table_Db_Adapter_MsSQL extends Pix_Table_Db_Adapter_MysqlCommon
 
         $res = $this->query("SP_PKEYS " . $this->column_quote($db_table_name));
         $table->_primary = array();
+
         while ($row = $res->fetch_object()) {
             $table->_primary[] = $row->COLUMN_NAME;
         }
+
         $res->free_result();
 
         $res = $this->query("SP_COLUMNS " . $this->column_quote($db_table_name));
@@ -195,6 +211,7 @@ class Pix_Table_Db_Adapter_MsSQL extends Pix_Table_Db_Adapter_MysqlCommon
             -1 => 'text', // long varchar
             -4 => 'blob', // long binary
         );
+
         while ($row = $res->fetch_object()) {
             $field = $row->COLUMN_NAME;
             $table->_columns[$field] = array();
@@ -214,6 +231,7 @@ class Pix_Table_Db_Adapter_MsSQL extends Pix_Table_Db_Adapter_MysqlCommon
                 $table->_columns[$field]['default'] = $row->COLUMN_DEFAULT;
             }
         }
+
         $res->free_result();
 
         return $table;
@@ -223,21 +241,26 @@ class Pix_Table_Db_Adapter_MsSQL extends Pix_Table_Db_Adapter_MysqlCommon
     {
         $res = $this->query("SP_TABLES");
         $tables = array();
+
         while ($row = $res->fetch_object()) {
             if ($row->TABLE_TYPE == 'TABLE') {
                 $tables[] = $row->TABLE_NAME;
             }
         }
+
         $res->free_result();
+
         return $tables;
     }
 
     public function getLastInsertId($table)
     {
         $res = $this->query("SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]");
+
         if ($row = $res->fetch_object()) {
             return $row->SCOPE_IDENTITY;
         }
+
         return null;
     }
 }

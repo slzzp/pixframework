@@ -23,8 +23,10 @@ abstract class Pix_Table_Db_Adapter_MysqlCommon extends Pix_Table_Db_Adapter_SQL
                 if (!$column['size']) {
                     throw new Exception('you should set the option `size`');
                 }
+
                 $s .= '(' . $column['size'] . ')';
             }
+
             $s .= ' ';
 
             if (isset($column['unsigned']) and $column['unsigned']) {
@@ -50,9 +52,11 @@ abstract class Pix_Table_Db_Adapter_MysqlCommon extends Pix_Table_Db_Adapter_SQL
 
         $s = 'PRIMARY KEY ' ;
         $index_columns = array();
+
         foreach ((is_array($table->_primary) ? $table->_primary : array($table->_primary)) as $pk) {
             $index_columns[] = $this->column_quote($pk);
         }
+
         $s .= '(' . implode(', ', $index_columns) . ")\n";
         $column_sql[] = $s;
 
@@ -62,12 +66,15 @@ abstract class Pix_Table_Db_Adapter_MysqlCommon extends Pix_Table_Db_Adapter_SQL
             } else {
                 $s = 'KEY ' . $this->column_quote($name);
             }
+
             $columns = $options['columns'];
 
             $index_columns = array();
+
             foreach ($columns as $column_name) {
                 $index_columns[] = $this->column_quote($column_name);
             }
+
             $s .= '(' . implode(', ', $index_columns) . ') ';
 
             $column_sql[] = $s;
@@ -102,14 +109,17 @@ abstract class Pix_Table_Db_Adapter_MysqlCommon extends Pix_Table_Db_Adapter_SQL
             $type = $row['Type'];
             if (preg_match('#^([a-z]+)\((\d+)\)\s?(unsigned)?$#', $type, $matches)) {
                 $table->_columns[$field]['type'] = $matches[1];
+
                 if (array_key_exists(1, $matches) and in_array($matches[1], array('binary', 'varchar', 'char'))) {
                     $table->_columns[$field]['size'] = $matches[2];
                 }
+
                 if (array_key_exists(3, $matches) and $matches[3] == 'unsigned') {
                     $table->_columns[$field]['unsigned'] = 1;
                 }
             } elseif (preg_match('#^([a-z]+)\s?(unsigned)?$#', $type, $matches)) {
                 $table->_columns[$field]['type'] = $matches[1];
+
                 if (array_key_exists(2, $matches) and $matches[2] == 'unsigned') {
                     $table->_columns[$field]['unsigned'] = 1;
                 }
@@ -133,6 +143,7 @@ abstract class Pix_Table_Db_Adapter_MysqlCommon extends Pix_Table_Db_Adapter_SQL
                 $table->_columns[$field]['default'] = $row['Default'];
             }
         }
+
         $res->free_result();
 
         // check INDEX
@@ -146,8 +157,10 @@ abstract class Pix_Table_Db_Adapter_MysqlCommon extends Pix_Table_Db_Adapter_SQL
                     'columns' => array(),
                 );
             }
+
             $db_indexes[$row['Key_name']]['columns'][] = $row['Column_name'];
         }
+
         $res->free_result();
 
         foreach ($db_indexes as $name => $options) {
@@ -171,10 +184,13 @@ abstract class Pix_Table_Db_Adapter_MysqlCommon extends Pix_Table_Db_Adapter_SQL
     {
         $res = $this->query("SHOW TABLES");
         $tables = array();
+
         while ($row = $res->fetch_array()) {
             $tables[] = $row[0];
         }
+
         $res->free_result();
+
         return $tables;
     }
 
@@ -191,7 +207,9 @@ abstract class Pix_Table_Db_Adapter_MysqlCommon extends Pix_Table_Db_Adapter_SQL
         if (!Pix_Setting::get('Table:DropTableEnable')) {
             throw new Pix_Table_Exception("要 DROP TABLE 前請加上 Pix_Setting::set('Table:DropTableEnable', true);");
         }
+
         $sql = "DROP TABLE " . $this->column_quote($table->getTableName());
+
         return $this->query($sql, $table);
     }
 
@@ -209,6 +227,7 @@ abstract class Pix_Table_Db_Adapter_MysqlCommon extends Pix_Table_Db_Adapter_SQL
         $match = ['`'];
         $replace = ['``'];
         $name = str_replace($match, $replace, $name);
+
         return "`$name`";
     }
 
@@ -226,12 +245,15 @@ abstract class Pix_Table_Db_Adapter_MysqlCommon extends Pix_Table_Db_Adapter_SQL
         if (is_null($column_name)) {
             return "'" . $link->real_escape_string(strval($value)) . "'";
         }
+
         if ($table->isNumbericColumn($column_name)) {
             return intval($value);
         }
+
         if (!is_scalar($value)) {
             trigger_error("{$_SERVER['SERVER_NAME']}{$_SERVER['REQUEST_URI']} 的 column `{$column_name}` 格式不正確: " . gettype($value), E_USER_WARNING);
         }
+
         return "'" . $link->real_escape_string(strval($value)) . "'";
     }
 
@@ -366,7 +388,6 @@ abstract class Pix_Table_Db_Adapter_MysqlCommon extends Pix_Table_Db_Adapter_SQL
 
         return $ret;
     }
-
 
     abstract public function query($sql);
 }

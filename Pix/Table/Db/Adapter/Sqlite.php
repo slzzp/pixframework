@@ -38,18 +38,23 @@ class Pix_Table_Db_Adapter_Sqlite extends Pix_Table_Db_Adapter_SQL
 
         $starttime = microtime(true);
         $statement = $this->_pdo->prepare($sql);
+
         if (!$statement) {
             if ($errno = $this->_pdo->errorCode()) {
                 $errorInfo = $this->_pdo->errorInfo();
             }
+
             if ($errorInfo[2] == 'PRIMARY KEY must be unique' or
                 preg_match('/(columns? .+ (are|is) not unique|UNIQUE constraint failed)/', $errorInfo[2])
             ) {
                 throw new Pix_Table_DuplicateException();
             }
+
             throw new Exception("SQL Error: ({$errorInfo[0]}:{$errorInfo[1]}) {$errorInfo[2]} (SQL: {$sql})");
         }
+
         $res = $statement->execute();
+
         if (($t = Pix_Table::getLongQueryTime()) and ($delta = (microtime(true) - $starttime)) > $t) {
             Pix_Table::debug(sprintf("[%s]\t%s\t%40s", $this->_path, $delta, $sql));
         }
@@ -58,11 +63,13 @@ class Pix_Table_Db_Adapter_Sqlite extends Pix_Table_Db_Adapter_SQL
             if ($errno = $this->_pdo->errorCode()) {
                 $errorInfo = $this->_pdo->errorInfo();
             }
+
             if ($errorInfo[2] == 'PRIMARY KEY must be unique' or
                 preg_match('/(columns? .+ (are|is) not unique|UNIQUE constraint failed)/', $errorInfo[2])
             ) {
                 throw new Pix_Table_DuplicateException();
             }
+
             throw new Exception("SQL Error: ({$errorInfo[0]}:{$errorInfo[1]}) {$errorInfo[2]} (SQL: {$sql})");
         }
 
@@ -101,6 +108,7 @@ class Pix_Table_Db_Adapter_Sqlite extends Pix_Table_Db_Adapter_SQL
                 if (!$column['size']) {
                     throw new Exception('you should set the option `size`');
                 }
+
                 $s .= '(' . $column['size'] . ')';
             }
 
@@ -108,12 +116,14 @@ class Pix_Table_Db_Adapter_Sqlite extends Pix_Table_Db_Adapter_SQL
             if (in_array($db_type, array('varchar', 'char', 'text'))) {
                 $s .= ' COLLATE NOCASE';
             }
+
             $s .= ' ';
 
             if ($column['auto_increment']) {
                 if ($primarys[0] != $name or count($primarys) > 1) {
                     throw new Exception('SQLITE 的 AUTOINCREMENT 一定要是唯一的 Primary Key: Table ' . $table->getTableName());
                 }
+
                 $s .= ' PRIMARY KEY AUTOINCREMENT ';
                 $pk_isseted = true;
             }
@@ -128,9 +138,11 @@ class Pix_Table_Db_Adapter_Sqlite extends Pix_Table_Db_Adapter_SQL
         if (!$pk_isseted) {
             $s = 'PRIMARY KEY ' ;
             $index_columns = array();
+
             foreach ((is_array($table->_primary) ? $table->_primary : array($table->_primary)) as $pk) {
                 $index_columns[] = $this->column_quote($pk);
             }
+
             $s .= '(' . implode(', ', $index_columns) . ")\n";
             $column_sql[] = $s;
         }
@@ -146,13 +158,16 @@ class Pix_Table_Db_Adapter_Sqlite extends Pix_Table_Db_Adapter_SQL
             } else {
                 $s = 'CREATE INDEX ';
             }
+
             $columns = $options['columns'];
 
             $s .= $this->column_quote($table->getTableName() . '_' . $name) . ' ON ' . $this->column_quote($table->getTableName());
             $index_columns = array();
+
             foreach ($columns as $column_name) {
                 $index_columns[] = $this->column_quote($column_name);
             }
+
             $s .= '(' . implode(', ', $index_columns) . ') ';
 
             $this->query($s);
@@ -164,7 +179,9 @@ class Pix_Table_Db_Adapter_Sqlite extends Pix_Table_Db_Adapter_SQL
         if (!Pix_Setting::get('Table:DropTableEnable')) {
             throw new Pix_Table_Exception("要 DROP TABLE 前請加上 Pix_Setting::set('Table:DropTableEnable', true);");
         }
+
         $sql = "DROP TABLE " . $this->column_quote($table->getTableName());
+
         return $this->query($sql, $table);
     }
 
@@ -185,12 +202,15 @@ class Pix_Table_Db_Adapter_Sqlite extends Pix_Table_Db_Adapter_SQL
         if (is_null($column_name)) {
             return $this->_pdo->quote($value);
         }
+
         if ($table->isNumbericColumn($column_name)) {
             return intval($value);
         }
+
         if (!is_scalar($value)) {
             trigger_error("{$_SERVER['SERVER_NAME']}{$_SERVER['REQUEST_URI']} 的 column `{$column_name}` 格式不正確: " . gettype($value), E_USER_WARNING);
         }
+
         return $this->_pdo->quote($value);
     }
 
@@ -201,6 +221,7 @@ class Pix_Table_Db_Adapter_Sqlite extends Pix_Table_Db_Adapter_SQL
                 return $this->_pdo->lastInsertId();
             }
         }
+
         return null;
     }
 }

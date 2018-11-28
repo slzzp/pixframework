@@ -36,12 +36,15 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
             if ($with_ping) {
                 $link->ping();
             }
+
             return $link;
         }
+
         if (array_key_exists($type, $this->_link_pools) and ($link = $this->_link_pools[$type])  and $this->_link_pool_version == self::$_connect_version) {
             if ($with_ping) {
                 $link->ping();
             }
+
             return $link;
         }
 
@@ -59,10 +62,13 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
 
                 // 如果有失敗的 log 並且是在五分鐘以內，暫時不連這一台
                 $conf = $confs[0]->{$type};
+
                 if ($time = intval(@file_get_contents("/tmp/Pix_Table_Db_Adapter_MysqlConf-{$conf->host}-{$conf->dbname}")) and $time > time() - 300) {
                     array_shift($confs);
+
                     continue;
                 }
+
                 break;
             }
 
@@ -71,6 +77,7 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
             $starttime = microtime(true);
             @$link->real_connect($conf->host, $conf->username, $conf->password, $conf->dbname);
             $delta = microtime(true) - $starttime;
+
             if ($delta > 0.5) {
                 trigger_error("{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']} connect to {$conf->host} time: $delta", E_USER_NOTICE);
             }
@@ -78,14 +85,17 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
             if (!$link->connect_errno) {
                 break;
             }
+
             $error = mysqli_connect_error();
             $wrong[] = "[{$conf->host} $error]";
+
             file_put_contents("/tmp/Pix_Table_Db_Adapter_MysqlConf-{$conf->host}-{$conf->dbname}", time() . ' ' . $error);
         }
 
         // $retry 用完了還是失敗
         if ($link->connect_errno) {
             trigger_error("{$_SERVER['HTTP_HOST']} reconnect to ($conf_file) $i times failed: " . implode(', ', $wrong), E_USER_NOTICE);
+
             throw new Pix_DbConnectErrorException("Connect to ($conf_file)($i times) failed: " . implode(', ', $wrong));
             // 有失敗過
         } elseif ($i) {
@@ -103,6 +113,7 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
         }
 
         $this->_link_pool_version = self::$_connect_version;
+
         return $this->_link_pools[$type] = $link;
     }
 
@@ -123,9 +134,11 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
             if (preg_match('#^SELECT #', strtoupper($sql))) {
                 $res = $this->_getLink($type)->query("EXPLAIN $sql");
                 $row = $res->fetch_assoc();
+
                 if (preg_match('#Using filesort#', $row['Extra'])) {
                     trigger_error("Using Filesort Query {$sql}", E_USER_WARNING);
                 }
+
                 $res->free_result();
             }
         }
@@ -150,6 +163,7 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
             $res = $link->query($sql);
             $this->insert_id = $link->insert_id;
             $delta = microtime(true) - $starttime;
+
             if (array_key_exists(Pix_Table::LOG_QUERY, Pix_Table::$_log_groups) and Pix_Table::$_log_groups[Pix_Table::LOG_QUERY]) {
                 Pix_Table::debug(sprintf("[%s-%s](%f)%s", strval($link->host_info), $type, $delta, $sql));
             } elseif (($t = Pix_Table::getLongQueryTime()) and $delta > $t) {
@@ -159,6 +173,7 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
             if ($res === false) {
                 if ($errno = $link->errno) {
                     $message = (is_null($table) ? '' : "Table: {$table->getClass()}") . "SQL Error: ({$errno}){$link->error} " . substr($sql, 0, 128);
+
                     switch ($errno) {
                         case 1146:
                             throw new Pix_Table_TableNotFoundException($message);
@@ -171,9 +186,11 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
                         case 2013: // Lost connection to MySQL server during query
                             trigger_error("Pix_Table " . $message, E_USER_WARNING);
                             $this->resetConnect();
+
                             continue 2;
                     }
                 }
+
                 throw new Pix_Table_Exception($message);
             }
 
@@ -184,12 +201,15 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
                     if (1592 == $e->errno) {
                         continue;
                     }
+
                     if (Pix_Table::$_throw_incorrect_string_exception and 1366 == $e->errno) {
                         throw new Pix_Table_IncorrectStringException($e->message);
                     }
+
                     trigger_error("Pix_Table " . (is_null($table) ? '' : "Table: {$table->getClass()}") . "SQL Warning: ({$e->errno}){$e->message} " . substr($sql, 0, 128), E_USER_WARNING);
                 } while ($e->next());
             }
+
             return $res;
         }
 

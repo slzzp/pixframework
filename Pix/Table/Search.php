@@ -27,9 +27,11 @@ class Pix_Table_Search
         }
 
         $search = new Pix_Table_Search();
+
         if (!is_null($data)) {
             $search = $search->search($data);
         }
+
         return $search;
     }
 
@@ -43,6 +45,7 @@ class Pix_Table_Search
             // TODO: 看看能不能轉成其他形式, Ex: "a" = 1 ...
             $this->_search_conditions[] = array('string', $search);
             $this->_search_condition_types['string'] ++;
+
             return $this;
         }
 
@@ -51,6 +54,7 @@ class Pix_Table_Search
                 $this->_search_conditions[] = array('map', $key, $value);
                 $this->_search_condition_types['map'] ++;
             }
+
             return $this;
         }
 
@@ -70,12 +74,15 @@ class Pix_Table_Search
         }
 
         $ret = array();
+
         foreach ($this->_search_conditions as $condiction) {
             if ($condiction[0] != $type) {
                 continue;
             }
+
             $ret[] = $condiction;
         }
+
         return $ret;
     }
 
@@ -87,54 +94,69 @@ class Pix_Table_Search
     public function order()
     {
         $args = func_get_args();
+
         if (!count($args)) {
             return $this->_order;
         }
+
         $this->_order = self::getOrderArray($args[0]);
+
         return $this;
     }
 
     public function limit()
     {
         $args = func_get_args();
+
         if (!count($args)) {
             return $this->_limit;
         }
+
         $this->_limit = $args[0];
+
         return $this;
     }
 
     public function index()
     {
         $args = func_get_args();
+
         if (!count($args)) {
             return $this->_index;
         }
+
         $this->_index = $args[0];
+
         return $this;
     }
 
     public function offset()
     {
         $args = func_get_args();
+
         if (!count($args)) {
             return $this->_offset;
         }
+
         $this->_offset = $args[0];
+
         return $this;
     }
 
     public function after()
     {
         $args = func_get_args();
+
         if (!count($args)) {
             return $this->_after;
         }
+
         $row = $args[0];
 
         $this->_before = null;
         $this->_after = is_array($row) ? Pix_Array::factory($row) : $row;
         $this->_after_include = array_key_exists(1, $args) ? $args[1] : false;
+
         return $this;
     }
 
@@ -146,14 +168,17 @@ class Pix_Table_Search
     public function before()
     {
         $args = func_get_args();
+
         if (!count($args)) {
             return $this->_before;
         }
+
         $row = $args[0];
 
         $this->_after = null;
         $this->_before = is_array($row) ? Pix_Array::factory($row) : $row;
         $this->_before_include = array_key_exists(1, $args) ? $args[1] : false;
+
         return $this;
     }
 
@@ -167,22 +192,27 @@ class Pix_Table_Search
         foreach ($order as $column => $way) {
             $order[$column] = ('asc' == $order[$column]) ? 'desc' : 'asc';
         }
+
         return $order;
     }
 
     public static function getOrderArray($order)
     {
         $resultorder = array();
+
         if (is_array($order)) {
             foreach ($order as $column => $way) {
                 if (is_int($column)) {
                     $resultorder[$way] = 'asc';
+
                     continue;
                 }
 
                 $resultorder[$column] = strtolower($way);
+
                 if (!in_array(strtolower($way), array('asc', 'desc'))) {
                     $resultorder[$column] = 'asc';
+
                     continue;
                 }
             }
@@ -192,8 +222,10 @@ class Pix_Table_Search
             if ('RAND()' == $order) {
                 return 'RAND()';
             }
+
             $orders = explode(',', $order);
             $resultorder = array();
+
             foreach ($orders as $ord) {
                 if (preg_match('#^`?([^` ]*)`?( .*)?$#', trim($ord), $matches)) {
                     if (array_key_exists(2, $matches) and in_array(strtolower(trim($matches[2])), array('asc', 'desc'))) {
@@ -201,12 +233,14 @@ class Pix_Table_Search
                     } else {
                         $way = 'asc';
                     }
+
                     $resultorder[$matches[1]] = $way;
                 } else {
                     throw new Pix_Array_Exception('->order($order) 的格式無法判斷');
                 }
             }
         }
+
         return $resultorder;
     }
 }

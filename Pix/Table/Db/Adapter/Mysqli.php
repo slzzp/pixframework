@@ -59,6 +59,7 @@ class Pix_Table_Db_Adapter_Mysqli extends Pix_Table_Db_Adapter_MysqlCommon
         if (Pix_Table::$_log_groups[Pix_Table::LOG_QUERY]) {
             Pix_Table::debug(sprintf("[%s]\t%40s", $this->_link->host_info, $sql));
         }
+
         // TODO 需要 log SQL Query 功能
         if ($comment = Pix_Table::getQueryComment()) {
             $sql = trim($sql, '; ') . ' #' . $comment;
@@ -66,6 +67,7 @@ class Pix_Table_Db_Adapter_Mysqli extends Pix_Table_Db_Adapter_MysqlCommon
 
         $starttime = microtime(true);
         $res = $this->_link->query($sql);
+
         if (($t = Pix_Table::getLongQueryTime()) and ($delta = (microtime(true) - $starttime)) > $t) {
             Pix_Table::debug(sprintf("[%s]\t%s\t%40s", $this->_link->host_info, $delta, $sql));
         }
@@ -82,6 +84,7 @@ class Pix_Table_Db_Adapter_Mysqli extends Pix_Table_Db_Adapter_MysqlCommon
                 }
             }
         }
+
         return $res;
     }
 
@@ -97,12 +100,15 @@ class Pix_Table_Db_Adapter_Mysqli extends Pix_Table_Db_Adapter_MysqlCommon
         if (is_null($column_name)) {
             return "'" . $this->_link->real_escape_string(strval($value)) . "'";
         }
+
         if ($table->isNumbericColumn($column_name)) {
             return intval($value);
         }
+
         if (!is_scalar($value)) {
             trigger_error("{$_SERVER['SERVER_NAME']}{$_SERVER['REQUEST_URI']} 的 column `{$column_name}` 格式不正確: " . gettype($value), E_USER_WARNING);
         }
+
         return "'" . $this->_link->real_escape_string(strval($value)) . "'";
     }
 

@@ -25,9 +25,11 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
         $sql = 'SELECT ' . $select_expression . ' FROM ' . $this->column_quote($table->getTableName());
         $sql .= ' WHERE ';
         $terms = array();
+
         foreach (array_combine($table->getPrimaryColumns(), $primary_values) as $k => $v) {
             $terms[] = $this->column_quote($k) . ' = ' . $this->quoteWithColumn($table, $v, $k);
         }
+
         $sql .= implode(' AND ', $terms);
 
         if (!$res = $this->query($sql)) {
@@ -36,6 +38,7 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
 
         $row = $res->fetch_assoc();
         $res->free_result();
+
         return $this->_filterRow($row);
     }
 
@@ -56,6 +59,7 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
         $res = $this->query($sql);
         $row = $res->fetch_assoc();
         $res->free_result();
+
         return $row['count'];
     }
 
@@ -77,6 +81,7 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
         $res = $this->query($sql);
         $row = $res->fetch_assoc();
         $res->free_result();
+
         return $row['sum'];
     }
 
@@ -92,17 +97,21 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
         if (!is_array($row)) {
             return $row;
         }
+
         $return_row = array();
 
         foreach ($row as $col => $value) {
             if (false === strpos($col, ':')) {
                 $return_row[$col] = $value;
+
                 continue;
             }
 
             list($col, $id) = explode(':', $col, 2);
+
             $return_row[$col][$id] = $value;
         }
+
         return $return_row;
     }
 
@@ -120,6 +129,7 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
                 return true;
             }
         }
+
         return false;
     }
 
@@ -145,9 +155,11 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
 
         if (is_array($select_columns)) {
             $cols = array();
+
             foreach ($select_columns as $col) {
                 $cols[] = $this->column_quote($col, $table);
             }
+
             $select_expression = implode(', ', $cols);
         }
 
@@ -174,9 +186,11 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
 
         $res = $this->query($sql);
         $rows = array();
+
         while ($row = $res->fetch_assoc()) {
             $rows[] = $this->_filterRow($row);
         }
+
         $res->free_result();
 
         return $rows;
@@ -192,6 +206,7 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
     public function deleteOne($row)
     {
         $table = $row->getTable();
+
         $sql = 'DELETE FROM ' . $this->column_quote($table->getTableName());
         $sql .= ' WHERE ';
         $sql .= $this->_get_where_clause(Pix_Table_Search::factory(array_combine($table->getPrimaryColumns(), $row->getPrimaryValues())), $table);
@@ -210,6 +225,7 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
     public function updateOne($row, $data)
     {
         $table = $row->getTable();
+
         $sql = 'UPDATE ' . $this->column_quote($table->getTableName());
         $sql .= ' SET ' . $this->_get_set_clause($data, $table);
         $sql .= ' WHERE ';
@@ -255,15 +271,19 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
         if (!is_array($keys_values)) {
             $keys_values = array();
         }
+
         $sql = 'INSERT INTO '. $this->column_quote($table->getTableName());
         $keys = $values = array();
+
         foreach ($keys_values as $key => $value) {
             if (is_null($value)) {
                 continue;
             }
+
             $keys[] = $this->column_quote($key);
             $values[] = $this->quoteWithColumn($table, $value, $key);
         }
+
         if ($keys) {
             $sql .= '(' . implode(', ', $keys) . ') VALUES (' . implode(', ', $values) . ')';
         } else {
@@ -303,6 +323,7 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
     protected function _get_where_clause($search, $table)
     {
         $terms = array();
+
         foreach ($search->getSearchCondictions() as $condiction) {
             switch ($condiction[0]) {
                 case 'map':
@@ -321,9 +342,11 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
 
         if ($search->after() or $search->before()) {
             $orders = $search->order() ?: array_fill_keys($table->getPrimaryColumns(), 'asc');
+
             if (!is_array($orders)) {
                 throw new Pix_Table_Exception("指定的 ORDER 無法使用 after 或是 before");
             }
+
             if ($row = $search->after()) {
                 $is_include = $search->afterInclude();
                 // 如果指定 before 的話，順序要調過來
@@ -338,9 +361,11 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
 
             foreach ($orders as $order => $way) {
                 $and_terms = array();
+
                 foreach ($equal_orders as $equal_order) {
                     $and_terms[] = $this->column_quote($equal_order) . " = " . $this->quoteWithColumn($table, $row->{$equal_order}, $equal_order);
                 }
+
                 $and_terms[] = $this->column_quote($order) . ('asc' == $way ? '>' : '<') . " " . $this->quoteWithColumn($table, $row->{$order}, $order);
                 $or_terms[] = '(' . implode(' AND ', $and_terms) . ')';
                 $equal_orders[] = $order;
@@ -348,11 +373,14 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
 
             if ($is_include) {
                 $and_terms = array();
+
                 foreach ($equal_orders as $equal_order) {
                     $and_terms[] = $this->column_quote($equal_order) . ' = ' . $this->quoteWithColumn($table, $row->{$equal_order}, $equal_order);
                 }
+
                 $or_terms[] = '(' . implode(' AND ', $and_terms) . ')';
             }
+
             $terms[] = '(' . implode(' OR ', $or_terms) . ')';
         }
 
@@ -373,16 +401,20 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
     protected function _get_clause($search)
     {
         $sql = '';
+
         if ($order = $search->order()) {
             if (is_array($order)) {
                 // 如果指定 before 的話，順序要調過來
                 if ($search->before()) {
                     $order = Pix_Table_Search::reverseOrder($order);
                 }
+
                 $order_term = array();
+
                 foreach ($order as $column => $way) {
                     $order_term[] = $this->column_quote($column) . ' ' . $way;
                 }
+
                 $sql .= ' ORDER BY ' . implode(', ', $order_term);
             } else {
                 $sql .= ' ORDER BY ' . $order;
@@ -390,8 +422,10 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
         }
 
         $limit = $search->limit();
+
         if (!is_null($limit)) {
             $offset = $search->offset();
+
             if (!is_null($offset)) {
                 $sql .= ' LIMIT ' . $offset . ', ' . $limit;
             } else {
@@ -418,9 +452,11 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
         }
 
         $terms = array();
+
         foreach ($keys_values as $column => $value) {
             $terms[] = $this->column_quote($column) . " = " . $this->quoteWithColumn($table, $value, $column);
         }
+
         $sql .= implode(', ', $terms);
 
         return $sql;

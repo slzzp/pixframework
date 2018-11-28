@@ -50,6 +50,7 @@ class Pix_Table_Row
         } catch (Pix_Table_Row_Stop $e) {
             return;
         }
+
         $this->getRowDb()->updateOne($this, $args);
 
         $this->refreshRowData();
@@ -64,6 +65,7 @@ class Pix_Table_Row
         if (!is_array($args)) {
             return $this->updateByString($args);
         }
+
         $table = $this->getTable();
 
         foreach ($args as $column => $value) {
@@ -71,6 +73,7 @@ class Pix_Table_Row
                 $this->{$column} = $value;
             }
         }
+
         $this->save();
     }
 
@@ -172,12 +175,15 @@ class Pix_Table_Row
     {
         $table = $this->getTable();
         $ret = array();
+
         foreach ($table->getPrimaryColumns() as $c) {
             if (!isset($this->_data[$c])) {
                 return null;
             }
+
             $ret[] = $this->_data[$c];
         }
+
         return $ret;
     }
 
@@ -253,6 +259,7 @@ class Pix_Table_Row
             }
 
             $changed_fields = $this->getChangedColumnValues();
+
             if (!count($changed_fields)) {
                 return;
             }
@@ -262,6 +269,7 @@ class Pix_Table_Row
             $this->cacheRow($this->_data);
             $this->postUpdate($changed_fields);
             $this->postSave();
+
             return $this->_primary_values;
         } else { // INSERT
             try {
@@ -292,6 +300,7 @@ class Pix_Table_Row
             $this->cacheRow($this->_data);
             $this->postInsert();
             $this->postSave();
+
             return $insert_id;
         }
     }
@@ -301,6 +310,7 @@ class Pix_Table_Row
         if (!isset($conf['tableClass'])) {
             throw new Pix_Table_Exception('建立 Row 必需要指定 tableClass');
         }
+
         $this->_tableClass = $conf['tableClass'];
         $this->_table = Pix_Table::getTable($this->_tableClass);
 
@@ -310,8 +320,10 @@ class Pix_Table_Row
                 if (!isset($conf['data'][$column])) {
                     throw new Pix_Table_Exception("{$this->_tableClass} Row 的資料抓的不完整(缺少 column: {$column})");
                 }
+
                 $this->_primary_values[] = $conf['data'][$column];
             }
+
             $this->_data = $conf['data'];
             $this->_orig_data = $conf['data'];
         } elseif (isset($conf['default'])) {
@@ -337,9 +349,11 @@ class Pix_Table_Row
     {
         while (Pix_Table::$_verify) {
             $column = $this->getTable()->_columns[$name];
+
             if ($value === null) {
                 break;
             }
+
             switch ($column['type']) {
                 case 'int':
                 case 'smallint':
@@ -354,21 +368,29 @@ class Pix_Table_Row
                     if (array_key_exists('unsigned', $column) and $column['unsigned'] and $value < 0) {
                         throw new Pix_Table_Row_InvalidFormatException($name, $column, $this);
                     }
+
                     break;
 
                 case 'enum':
                     if (is_array($column['list']) and !in_array($value, $column['list'])) {
                         throw new Pix_Table_Row_InvalidFormatException($name, $column, $this);
                     }
+
                     break;
+
                 case 'varchar':
                 case 'char':
-        /*          if (strlen($value) > $column['size'])
-                    throw new Pix_Table_Row_InvalidFormatException($name, $column, $this);
-                    break; */
+                    /*
+                    if (strlen($value) > $column['size']) {
+                        throw new Pix_Table_Row_InvalidFormatException($name, $column, $this);
+                    }
+
+                    break;
+                    */
             }
             break;
         }
+
         $this->_data[$name] = $value;
     }
 
@@ -377,6 +399,7 @@ class Pix_Table_Row
         if (!array_key_exists('get', $this->getTable()->_hooks[$name])) {
             throw new Pix_Table_Exception("沒有指定 {$name} 的 get 變數");
         }
+
         $get = $this->getTable()->_hooks[$name]['get'];
 
         if (is_scalar($get)) {
@@ -395,6 +418,7 @@ class Pix_Table_Row
         if (!array_key_exists('set', $this->getTable()->_hooks[$name])) {
             throw new Pix_Table_Exception("沒有指定 {$name} 的 set 變數");
         }
+
         $set = $this->getTable()->_hooks[$name]['set'];
 
         if (is_scalar($set)) {
@@ -411,6 +435,7 @@ class Pix_Table_Row
     public function getRelation($name)
     {
         $table = $this->getTable();
+
         if (isset($this->_relation_data[$name])) {
             return $this->_relation_data[$name];
         }
@@ -419,9 +444,11 @@ class Pix_Table_Row
             $foreign_table = $this->getTable()->getRelationForeignTable($name);
             $foreign_keys = $this->getTable()->getRelationForeignKeys($name);
             $primary_values = $this->getPrimaryValues();
+
             if (count($foreign_keys) !== count($primary_values)) {
                 throw new Pix_Table_Exception($this->getTableClass() . ' 在拉 ' . $name . ' relation 時， foreign key 數量不正確');
             }
+
             $where = array_combine($foreign_keys, $primary_values);
 
             return $this->_relation_data[$name] = $foreign_table->search($where, $this);
@@ -432,6 +459,7 @@ class Pix_Table_Row
         $foreign_keys = $this->getTable()->getRelationForeignKeys($name);
 
         $cols = array();
+
         foreach ($foreign_keys as $column) {
             $cols[] = $this->{$column};
         }
@@ -441,12 +469,14 @@ class Pix_Table_Row
         } else {
             $row = null;
         }
+
         return $row;
     }
 
     public function setRelation($name, $value)
     {
         $table = $this->getTable();
+
         // 如果是 has_many 不給 set
         if ($table->_relations[$name]['rel'] == 'has_many') {
             throw new Pix_Table_Exception("has_many 不能夠 ->{$name} = \$value; 請改用 ->{$name}[] = \$value");
@@ -474,9 +504,11 @@ class Pix_Table_Row
             }
 
             $column_values = array_combine($foreign_keys, $value);
+
             foreach ($column_values as $column => $value) {
                 $this->{$column} = $value;
             }
+
             return;
         } else {
             throw new Pix_Table_Exception('relation 的 rel 只能是 has_many, has_one 或是 belongs_to 喔');
@@ -486,6 +518,7 @@ class Pix_Table_Row
     public function __get($name)
     {
         $table = $this->getTable();
+
         // State1. 檢查是否在 column 裡面
         if (isset($table->_columns[$name])) {
             return $this->getColumn($name);
@@ -505,12 +538,15 @@ class Pix_Table_Row
         if (array_key_exists($name, $table->_aliases)) {
             $aliases = $table->_aliases[$name];
             $rel = $this->getRelation($aliases['relation']);
+
             if ($aliases['where']) {
                 $rel = $rel->search($aliases['where']);
             }
+
             if ($aliases['order']) {
                 $rel = $rel->order($aliases['order']);
             }
+
             return $rel;
         }
 
@@ -518,12 +554,14 @@ class Pix_Table_Row
         if (isset($table->_hooks[$name])) {
             return $this->getHook($name);
         }
+
         throw new Pix_Table_NoThisColumnException("{$this->getTableClass()} 沒有 {$name} 這個 column");
     }
 
     public function __set($name, $value)
     {
         $table = $this->getTable();
+
         // State1. 檢查是否在 column 裡面
         if (isset($table->_columns[$name])) {
             $this->setColumn($name, $value);
@@ -547,12 +585,14 @@ class Pix_Table_Row
             $this->setHook($name, $value);
             return;
         }
+
         throw new Pix_Table_NoThisColumnException("{$this->getTableClass()} 沒有 {$name} 這個 column");
     }
 
     public function __isset($name)
     {
         $table = $this->getTable();
+
         if (isset($table->_columns[$name]) or isset($table->_aliases[$name])) {
             return true;
         }
@@ -563,6 +603,7 @@ class Pix_Table_Row
 
         if ($table->_relations[$name]) {
             $row = $this->getRelation($name);
+
             if ($row) {
                 return true;
             } else {
@@ -573,15 +614,18 @@ class Pix_Table_Row
         if ($name[0] == '_') {
             return isset($this->_user_data[substr($name, 1)]);
         }
+
         return false;
     }
 
     public function toArray()
     {
         $array = array();
+
         foreach ($this->getTable()->_columns as $name => $temp) {
             $array[$name] = $this->{$name};
         }
+
         return $array;
     }
 
@@ -591,9 +635,11 @@ class Pix_Table_Row
             unset($this->_user_data[substr($name, 1)]);
         } elseif ('has_one' == $this->getTable()->_relations[$name]['rel']) {
             $foreign_keys = $this->getTable()->getRelationForeignKeys($name);
+
             if ($foreign_keys == $this->getTable()->getPrimaryColumns()) {
                 throw new Exception('Foreign Key 等於 Primary Key 的 Relation 不可以直接 unset($obj->rel)');
             }
+
             $this->{$name} = null;
             $this->save();
         } else {
@@ -604,6 +650,7 @@ class Pix_Table_Row
     public function createRelation($relation, $values = array())
     {
         $table = $this->getTable();
+
         if (!$table->_relations[$relation]) {
             throw new Exception($relation . ' 不是 relation name ，不能 create_' . $relation);
         }
@@ -620,25 +667,30 @@ class Pix_Table_Row
         $primary_keys = $foreign_table->getPrimaryColumns();
 
         $foreign_values = array();
+
         foreach ($table->getRelationForeignKeys($relation) as $key) {
             $foreign_values[] = $this->{$key};
         }
+
         $row = $foreign_table->createRow($this);
 
         foreach (array_merge(array_combine($primary_keys, $foreign_values), $values) as $key => $value) {
             if (!isset($foreign_table->_columns[$key]) and !isset($foreign_table->_relations[$key])) {
                 continue;
             }
+
             $row->{$key} = $value;
         }
 
         $row->save();
+
         return $this->_relation_data[$relation] = $row;
     }
 
     public function __call($name, $args)
     {
         $table = $this->getTable();
+
         if (preg_match('#create_(.+)#', $name, $ret)) {
             if (count($args) > 0) {
                 return $this->createRelation($ret[1], $args[0]);
@@ -648,10 +700,12 @@ class Pix_Table_Row
         } elseif ($table->getHelperManager('row')->hasMethod($name)) {
             $new_args = $args;
             array_unshift($new_args, $this);
+
             return $table->getHelperManager('row')->callHelper($name, $new_args);
         } elseif (Pix_Table::getStaticHelperManager('row')->hasMethod($name)) {
             $new_args = $args;
             array_unshift($new_args, $this);
+
             return Pix_Table::getStaticHelperManager('row')->callHelper($name, $new_args);
         } else {
             throw new Pix_Table_Exception(get_class($this) . " 沒有 $name 這個 function 喔");
