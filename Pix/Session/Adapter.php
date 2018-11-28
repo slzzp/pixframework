@@ -40,9 +40,11 @@ abstract class Pix_Session_Adapter
         if (isset($options[$key])) {
             return $options[$key];
         }
+
         if (isset($this->_options[$key])) {
             return $this->_options[$key];
         }
+
         return Pix_Session::getOption($key);
     }
 

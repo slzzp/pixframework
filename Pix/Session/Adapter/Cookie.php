@@ -16,9 +16,11 @@ class Pix_Session_Adapter_Cookie extends Pix_Session_Adapter
         Pix_Session_Adapter::__construct($config);
 
         list($sig, $data) = array_pad(explode('|', $_COOKIE[$this->_getCookieKey()], 2), 2, null);
+
         if (!$secret = $this->getOption('secret')) {
             throw new Pix_Exception('you should set the option `secret`');
         }
+
         if ($this->_sig($data . $this->_getCookieDomain(), $secret) != $sig) {
             return;
         }
@@ -58,6 +60,7 @@ class Pix_Session_Adapter_Cookie extends Pix_Session_Adapter
         $data = json_encode($this->_data);
         $sig = $this->_sig($data . $this->_getCookieDomain(), $this->getOption('secret'));
         $params = session_get_cookie_params();
+
         Pix_HttpResponse::setcookie(
             $this->_getCookieKey(),
             $sig . '|' . $data,

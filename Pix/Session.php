@@ -29,6 +29,7 @@ class Pix_Session
         if (!is_null(self::$_obj)) {
             return self::$_obj;
         }
+
         return self::$_obj = Pix_Session_Adapter::loadAdapter(self::$_adapter, self::$_adapter_options);
     }
 
@@ -49,6 +50,7 @@ class Pix_Session
         if (is_null(self::$_helper_manager)) {
             self::$_helper_manager = new Pix_Helper_Manager();
         }
+
         return self::$_helper_manager;
     }
 
@@ -76,42 +78,49 @@ class Pix_Session
     public function __call($name, $args)
     {
         array_unshift($args, $this);
+
         return self::getHelperManager()->callHelper($name, $args);
     }
 
     public static function get($key)
     {
         $obj = self::getObject();
+
         return $obj->get($key);
     }
 
     public static function set($key, $value)
     {
         $obj = self::getObject();
+
         return $obj->set($key, $value);
     }
 
     public static function delete($key)
     {
         $obj = self::getObject();
+
         return $obj->delete($key);
     }
 
     public static function clear()
     {
         $obj = self::getObject();
+
         return $obj->clear();
     }
 
     public static function setOption($key, $value)
     {
         $obj = self::getObject();
+
         return $obj->setOption($key, $value);
     }
 
     public static function getOption($key)
     {
         $obj = self::getObject();
+
         return $obj->getOption($key);
     }
 
