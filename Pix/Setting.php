@@ -38,6 +38,7 @@ class Pix_Setting
         if (array_key_exists($key, self::$_settings)) {
             return self::$_settings[$key];
         }
+
         return null;
     }
 }
