@@ -31,6 +31,7 @@ class Pix_Prompt
             echo $prompt;
             $line = fgets($fp);
             fclose($fp);
+
             return $line;
         }
     }
@@ -39,9 +40,11 @@ class Pix_Prompt
     {
         self::$_often = get_defined_functions();
         self::$_often = array_merge(self::$_often['internal'], get_declared_classes());
+
         if (is_null($paths)) {
             $paths = explode(PATH_SEPARATOR, get_include_path());
         }
+
         self::$_paths = $paths;
 
         if (self::_supportedReadline()) {
@@ -68,10 +71,12 @@ class Pix_Prompt
                 if (is_null(self::$__last) or self::$__l != self::$__last) {
                     readline_add_history(self::$__l);
                 }
+
                 if (self::$__history_path) {
                     readline_write_history(self::$__history_path);
                 }
             }
+
             try {
                 eval(self::$__l . ";");
                 echo "\n";
@@ -79,6 +84,7 @@ class Pix_Prompt
                 echo $e->getMessage() . "\n";
                 echo $e->getTraceAsString() . "\n";
             }
+
             self::$_vars = get_defined_vars();
             self::$__last = self::$__l;
         }
@@ -92,11 +98,13 @@ class Pix_Prompt
         self::addOften($prefix);
 
         $ret = array();
+
         foreach (self::$_often as $name) {
             if ('' === trim($m) or strpos($name, $m) === 0) {
                 $ret[] = $name;
             }
         }
+
         return $ret;
     }
 
@@ -105,10 +113,12 @@ class Pix_Prompt
         if (isset(self::$_walked_prefix[$prefix]) and self::$_walked_prefix[$prefix]) {
             return;
         }
+
         self::$_walked_prefix[$prefix] = true;
 
         foreach (self::$_paths as $path) {
             $dir = rtrim($path, '/') . '/' . str_replace('_', '/', $prefix) . '/';
+
             if (!file_exists($dir) or !is_dir($dir)) {
                 continue;
             }
@@ -122,6 +132,7 @@ class Pix_Prompt
                 if (!is_file($dir . $f)) {
                     continue;
                 }
+
                 if (preg_match('#^(.*)\.php$#', $f, $matches)) {
                     self::$_often[] = ltrim($prefix . '_' . $matches[1], '_') . '::';
                 }
@@ -132,6 +143,7 @@ class Pix_Prompt
     public static function autocomplete($name, $args2, $args3)
     {
         $res = array();
+
         if (preg_match('#^(.*)::(.*)$#', $name, $matches)) {
             $methods = get_class_methods($matches[1]);
 
@@ -142,6 +154,7 @@ class Pix_Prompt
             }
         } elseif (preg_match('#\$([^$]*)->([^>]*)$#', readline_info('line_buffer'), $matches)) {
             $obj = self::$_vars[$matches[1]];
+
             if (!is_object($obj) or ($class = get_class($obj)) === false) {
                 return null;
             }
@@ -195,6 +208,7 @@ class Pix_Prompt
             }
 
             $methods = get_class_methods($class);
+
             foreach ($methods as $m) {
                 if (($matches[2] === '') or (strpos($m, $matches[2]) === 0)) {
                     $res[] = $m . '()';
@@ -209,6 +223,7 @@ class Pix_Prompt
         if (count($res) == 0) {
             return null;
         }
+
         return $res;
     }
 }
