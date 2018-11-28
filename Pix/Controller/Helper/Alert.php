@@ -27,6 +27,7 @@ class Pix_Controller_Helper_Alert extends Pix_Helper
     {
         $view = new Pix_Partial(__DIR__ . '/Alert/');
         echo $view->partial('alert.phtml', array('message' => $message, 'url' => $url));
+
         return $controller->noview();
     }
 }

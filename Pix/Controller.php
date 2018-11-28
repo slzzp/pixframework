@@ -91,6 +91,7 @@ class Pix_Controller
     public function redraw($partial_name)
     {
         echo $this->draw($partial_name);
+
         return $this->noview();
     }
 
@@ -103,6 +104,7 @@ class Pix_Controller
     public function getURI()
     {
         list($uri, $params) = array_pad(explode('?', $_SERVER['REQUEST_URI'], 2), 2, null);
+
         return $uri;
     }
 
@@ -117,6 +119,7 @@ class Pix_Controller
     public function redirect($url, $code = 302)
     {
         Pix_HttpResponse::redirect($url, $code);
+
         return $this->noview();
     }
 
@@ -133,6 +136,7 @@ class Pix_Controller
         if (!($dispatcher instanceof Pix_Controller_Dispatcher ) and !is_callable($dispatcher)) {
             throw new Exception("addDispatcher 只能指定 Pix_Controller_Dispatcher & callable function");
         }
+
         self::$_dispatchers[] = $dispatcher;
     }
 
@@ -153,6 +157,7 @@ class Pix_Controller
         if (is_null(self::$_helper_manager)) {
             self::$_helper_manager = new Pix_Helper_Manager();
         }
+
         return self::$_helper_manager;
     }
 
@@ -219,6 +224,7 @@ class Pix_Controller
             } else {
                 throw new Exception('不明的 Dispatcher');
             }
+
             if (!is_null($controllerName) and !is_null($actionName)) {
                 break;
             }
@@ -237,6 +243,7 @@ class Pix_Controller
 
             $className = ucfirst($controllerName) . 'Controller';
             $file = $baseDir . '/controllers/' . $className . '.php';
+
             if (!class_exists($className, false)) {
                 if (file_exists($file)) {
                     include($file);
@@ -254,6 +261,7 @@ class Pix_Controller
             $controller->actionName = $actionName;
             $controller->view->setPath("$baseDir/views/");
             $controller->init($params);
+
             if (is_null($controller->actionName)) {
                 throw new Pix_Controller_Dispatcher_Exception();
             }
@@ -261,6 +269,7 @@ class Pix_Controller
             if (!method_exists($controller, $controller->actionName . 'Action')) {
                 throw new Pix_Controller_Dispatcher_Exception('404 Method not found');
             }
+
             $controller->{$controller->actionName . 'Action'}($params);
 
             $file = $controller->view->getPath() . "$controllerName/$controller->actionName.phtml";

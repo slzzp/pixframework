@@ -43,9 +43,11 @@ class Pix_Controller_Helper_Http extends Pix_Helper
             header('Last-Modified: ' . date("r", $options['last_modified_time']));
             header('Expires: ' . date("r", time() + $max_age));
         }
+
         if ($options['etag']) {
             header('Etag: ' . $options['etag']);
         }
+
         // 不要設定 Pragma
         header('Pragma: ');
     }
