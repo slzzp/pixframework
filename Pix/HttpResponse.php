@@ -20,6 +20,7 @@ class Pix_HttpResponse
     public static function redirect($url, $code = 302)
     {
         header("Location: $url", true, $code);
+
         self::runHook('redirect', func_get_args());
     }
 
@@ -28,6 +29,7 @@ class Pix_HttpResponse
         if (is_null($domain)) {
             $domain = $_SERVER['HTTP_HOST'];
         }
+
         setcookie($name, $value, $expire, $path, $domain);
         self::runHook('setcookie', func_get_args());
     }
