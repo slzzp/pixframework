@@ -18,8 +18,10 @@ class Pix_Loader
         $class = str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
 
         $paths = explode(PATH_SEPARATOR, get_include_path());
+
         foreach ($paths as $path) {
             $path = rtrim($path, '/');
+
             if (file_exists($path . '/' . $class)) {
                 require $class;
 
