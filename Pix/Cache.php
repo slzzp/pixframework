@@ -20,9 +20,12 @@ class Pix_Cache
     {
         if (!self::$_servers[$this->_id]) {
             trigger_error('你應該要先做 Pix_Cache::addServer()', E_USER_WARNING);
+
             return null;
         }
+
         $ret = call_user_func_array(array(self::$_servers[$this->_id], $func), $args);
+
         return $ret;
     }
     
@@ -46,9 +49,11 @@ class Pix_Cache
         }
 
         $server = new $adapter($conf);
+
         if (!is_a($server, 'Pix_Cache_Core') and !is_a($server, 'Pix_Cache_Adapter')) {
             throw new Pix_Exception("$adapter is not a Pix_Cache_Adapter");
         }
+
         self::$_servers[$id] = $server;
     }
 
