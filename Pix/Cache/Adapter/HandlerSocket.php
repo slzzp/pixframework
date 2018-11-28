@@ -25,11 +25,13 @@ class Pix_Cache_Adapter_HandlerSocket extends Pix_Cache_Adapter
 
         if (is_null($this->_hs[$type])) {
             $config = $this->_config;
+
             if (!is_array($config)) {
                 throw new Pix_Exception('config error');
             }
 
             $hs = new HandlerSocket($config[$type]['host'], $config[$type]['port']);
+
             if ('write' == $type) {
                 if (!$hs->openIndex(1, $config[$type]['dbname'], $config[$type]['table'], '', 'value')) {
                     throw new Exception($hs->getError());
@@ -39,16 +41,20 @@ class Pix_Cache_Adapter_HandlerSocket extends Pix_Cache_Adapter
                     throw new Exception($hs->getError());
                 }
             }
+
             $this->_hs[$type] = $hs;
         }
+
         return $this->_hs[$type];
     }
 
     protected function _getOptions($options)
     {
         $ret = array();
-        $ret['expire'] = is_int($options) ? $options : (isset($options['expire']) ? $options['expire'] : 3600);
+
+        $ret['expire']   = is_int($options) ? $options : (isset($options['expire']) ? $options['expire'] : 3600);
         $ret['compress'] = isset($options['compress']) ? $options['compress'] : false;
+
         return $ret;
     }
 
@@ -60,6 +66,7 @@ class Pix_Cache_Adapter_HandlerSocket extends Pix_Cache_Adapter
     public function set($key, $value, $options = array())
     {
         $hs = $this->getSocket('write');
+
         if (!$hs->executeInsert(1, array($key, $value))) {
             $hs->executeUpdate(1, '=', array($key), array($value), 1, 0);
         }
@@ -68,9 +75,11 @@ class Pix_Cache_Adapter_HandlerSocket extends Pix_Cache_Adapter
     public function delete($key)
     {
         $hs = $this->getSocket('write');
+
         if (!$hs->executeDelete(1, '=', array($key))) {
             return 0;
         }
+
         return 1;
     }
 
@@ -92,14 +101,18 @@ class Pix_Cache_Adapter_HandlerSocket extends Pix_Cache_Adapter
     public function get($key)
     {
         $hs = $this->getSocket();
+
         $retval = $hs->executeSingle(1, '=', array($key), 1, 0);
 
         return ($retval[0][1]);
     }
 
-    /*public function gets(array $keys)
+    /*
+    public function gets(array $keys)
     {
         $memcache = $this->getMemcache();
+
         return $memcache->get($keys);
-    } */
+    }
+    */
 }

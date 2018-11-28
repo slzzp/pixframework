@@ -74,6 +74,7 @@ class Pix_Cache_Adapter_Array extends Pix_Cache_Adapter
     public function delete($key)
     {
         unset($this->bigArray[$key]);
+
         return true;
     }
 
@@ -93,6 +94,7 @@ class Pix_Cache_Adapter_Array extends Pix_Cache_Adapter
         }
 
         self::set($key, $value, $options);
+
         return true;
     }
 
@@ -107,6 +109,7 @@ class Pix_Cache_Adapter_Array extends Pix_Cache_Adapter
     public function inc($key, $inc = 1)
     {
         $old_value = self::get($key);
+
         if (!is_numeric($old_value)) {
             self::set($key, $inc);
         } else {
@@ -128,6 +131,7 @@ class Pix_Cache_Adapter_Array extends Pix_Cache_Adapter
     public function dec($key, $dec = 1)
     {
         $old_value = self::get($key);
+
         if (!is_numeric($old_value)) {
             self::set($key, $dec);
         } else {
@@ -152,6 +156,7 @@ class Pix_Cache_Adapter_Array extends Pix_Cache_Adapter
         if (!is_scalar($data)) {
             throw new InvalidArgumentException('append 只能加文字');
         }
+
         if (!array_key_exists($key, $this->bigArray)) {
             return false;
         }
@@ -160,6 +165,7 @@ class Pix_Cache_Adapter_Array extends Pix_Cache_Adapter
         $old_value = self::get($key);
         $new_value = $old_value . $data;
         self::set($key, $new_value, $options);
+
         return true;
     }
 
@@ -177,6 +183,7 @@ class Pix_Cache_Adapter_Array extends Pix_Cache_Adapter
         if (!is_scalar($data)) {
             throw new InvalidArgumentException('prepend 只能加文字');
         }
+
         if (!array_key_exists($key, $this->bigArray)) {
             return false;
         }
@@ -185,6 +192,7 @@ class Pix_Cache_Adapter_Array extends Pix_Cache_Adapter
         $old_value = self::get($key);
         $new_value = $data . $old_value;
         self::set($key, $new_value, $options);
+
         return true;
     }
 
@@ -200,7 +208,9 @@ class Pix_Cache_Adapter_Array extends Pix_Cache_Adapter
         if (!array_key_exists($key, $this->bigArray)) {
             return false;
         }
+
         $result = $this->bigArray[$key];
+
         if ($result['end_at'] && (time() > $result['end_at'])) {
             self::delete($key);
         }
@@ -218,9 +228,11 @@ class Pix_Cache_Adapter_Array extends Pix_Cache_Adapter
     public function gets(array $keys)
     {
         $data = array();
+
         foreach ($keys as $key) {
             $data[$key] = self::get($key);
         }
+
         return $data;
     }
 }

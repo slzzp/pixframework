@@ -18,14 +18,17 @@ abstract class Pix_Cache_Adapter
     abstract public function inc($key);
     abstract public function dec($key);
     abstract public function get($key);
+
     public function load($key)
     {
         return $this->get($key);
     }
+
     public function save($key, $value, $options = array())
     {
         return $this->set($key, $value, $options);
     }
+
     public function remove($key)
     {
         return $this->delete($key);
@@ -41,13 +44,17 @@ abstract class Pix_Cache_Adapter
     public function gets(array $keys)
     {
         $ret = array();
+
         foreach ($keys as $key) {
             $data = $this->get($key);
+
             if (false === $data) {
                 continue;
             }
+
             $ret[$key] = $data;
         }
+
         return $ret;
     }
 
