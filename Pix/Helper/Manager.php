@@ -147,9 +147,11 @@ class Pix_Helper_Manager
     public function callHelper($method, $args)
     {
         $helper_id = $this->_getHelperIdByMethodName($method);
+
         if (is_null($helper_id)) {
             throw new Pix_Helper_Exception("There is no {$method} in Helper");
         }
+
         $helper_info = $this->_getHelperInfo($helper_id);
 
         return call_user_func_array(array($helper_info['object'], $method), $args);
