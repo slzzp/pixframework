@@ -41,6 +41,7 @@ abstract class Pix_Array implements Countable, SeekableIterator, ArrayAccess
         if (is_null($obj)) {
             return new Pix_Array_Array(array());
         }
+
         return null;
     }
 
@@ -93,12 +94,14 @@ abstract class Pix_Array implements Countable, SeekableIterator, ArrayAccess
     public function pager($page, $perPage)
     {
         $page = max(1, intval($page));
+
         return $this->limit($perPage)->offset(($page - 1) * $perPage);
     }
 
     public function paginate($page = 1, $options = array())
     {
         $default_per_page = 20;
+
         $page = max(1, intval($page));
         $default_settings = array(
             // per_page:每頁幾項, order:SQL排序QUERY
@@ -106,15 +109,19 @@ abstract class Pix_Array implements Countable, SeekableIterator, ArrayAccess
             'order' => '`id` DESC',
         );
         $settings = array_merge($default_settings, $options);
+
         foreach ($settings as $key => $val) {
             $$key = $val;
         }
+
         if ($per_page <= 0) {
             $per_page = $default_per_page;
         }
+
         $this->total_page = ceil(count($this) / $per_page);
         $this->per_page = $per_page;
         $this->now_page = $page;
+
         return $this->limit($per_page)->offset(($page - 1) * $per_page)->order($order);
     }
 
@@ -122,6 +129,7 @@ abstract class Pix_Array implements Countable, SeekableIterator, ArrayAccess
     {
         $obj = clone $this;
         $obj->addFilter($filter, $options);
+
         return $obj;
     }
 
@@ -131,6 +139,7 @@ abstract class Pix_Array implements Countable, SeekableIterator, ArrayAccess
         $filter_name = 'Pix_Array_Filter_' . $filter;
         $filter_obj = new $filter_name;
         $obj->addFilter(array($filter_obj, 'filter'), $options);
+
         return $obj;
     }
 
@@ -145,12 +154,15 @@ abstract class Pix_Array implements Countable, SeekableIterator, ArrayAccess
     public function after()
     {
         $args = func_get_args();
+
         if (!count($args)) {
             return $this->_after;
         }
+
         $rs = clone $this;
         $rs->_after = $args[0];
         $rs->_after_included = array_key_exists(1, $args) ? $args[1] : false;
+
         return $rs;
     }
 
@@ -171,11 +183,13 @@ abstract class Pix_Array implements Countable, SeekableIterator, ArrayAccess
         if (count($this->_filters)) {
             foreach ($this->_filters as $filter) {
                 list($callback, $options) = $filter;
+
                 if (is_callable($callback)) {
                     return call_user_func_array($callback, array($this->current(), $options));
                 }
             }
         }
+
         return true;
     }
 

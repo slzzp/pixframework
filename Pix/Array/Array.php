@@ -37,6 +37,7 @@ class Pix_Array_Array extends Pix_Array
     {
         $rand_data = $this->_data;
         shuffle($rand_data);
+
         if ($count) {
             return new Pix_Array_Array(array_slice($rand_data, 0, $count));
         } else {
@@ -52,20 +53,24 @@ class Pix_Array_Array extends Pix_Array
     public function offset($offset = 0)
     {
         $this->_offset = $offset;
+
         return $this;
     }
 
     public function _sort($a, $b)
     {
         $way_num = array('asc' => 1, 'desc' => -1);
+
         foreach ($this->_order as $column => $way) {
             if (is_array($a)) {
                 if (!array_key_exists($column, $a) or !array_key_exists($column, $b)) {
                     return 0;
                 }
+
                 if (strtolower($a[$column]) > strtolower($b[$column])) {
                     return $way_num[$way];
                 }
+
                 if (strtolower($a[$column]) < strtolower($b[$column])) {
                     return -1 * $way_num[$way];
                 }
@@ -73,11 +78,13 @@ class Pix_Array_Array extends Pix_Array
                 if (strtolower($a->{$column}) > strtolower($b->{$column})) {
                     return $way_num[$way];
                 }
+
                 if (strtolower($a->{$column}) < strtolower($b->{$column})) {
                     return -1 * $way_num[$way];
                 }
             }
         }
+
         return 0;
     }
 
@@ -90,6 +97,7 @@ class Pix_Array_Array extends Pix_Array
     {
         $obj = clone $this;
         $obj->_order = Pix_Table_Search::getOrderArray($order);
+
         return $obj;
     }
 
@@ -102,6 +110,7 @@ class Pix_Array_Array extends Pix_Array
     {
         $obj = clone $this;
         $obj->_limit = $limit;
+
         return $obj;
     }
 
@@ -110,6 +119,7 @@ class Pix_Array_Array extends Pix_Array
         if (!$column) {
             return array_sum($this->_data);
         }
+
         throw new Pix_Array_Exception('TODO');
     }
 
@@ -132,6 +142,7 @@ class Pix_Array_Array extends Pix_Array
     {
         $ret = array();
         $i = 0;
+
         foreach ($this as $key => $row) {
             if (is_null($column)) {
                 $ret[$key] = $row;
@@ -143,6 +154,7 @@ class Pix_Array_Array extends Pix_Array
                 }
             }
         }
+
         return $ret;
     }
 
@@ -202,6 +214,7 @@ class Pix_Array_Array extends Pix_Array
     public function rewind()
     {
         $this->_cur_data = $this->_data;
+
         if ($this->_order) {
             uasort($this->_cur_data, array($this, '_sort'));
         }
@@ -213,6 +226,7 @@ class Pix_Array_Array extends Pix_Array
             if ($this->filterRow()) {
                 $offset ++;
             }
+
             next($this->_cur_data);
         }
 

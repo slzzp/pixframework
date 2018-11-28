@@ -58,6 +58,7 @@ class Pix_Array_Merger implements Iterator
 
         $rs = clone $this;
         $rs->_chunk_size = intval($args[0]);
+
         return $rs;
     }
 
@@ -116,6 +117,7 @@ class Pix_Array_Merger implements Iterator
         $rs = clone $this;
         $rs->_after = $position;
         $rs->_after_included = $included;
+
         return $rs;
     }
 
@@ -142,12 +144,14 @@ class Pix_Array_Merger implements Iterator
                     continue;
                 }
             }
+
             $data = $this->_array_datas[$pos];
 
             if (is_null($min_pos)) {
                 $min_pos = $pos;
                 $min_row = $data[0];
                 $min_columns = $this->_getSortColumns($pos);
+
                 continue;
             }
 
@@ -168,6 +172,7 @@ class Pix_Array_Merger implements Iterator
                 } else {
                     $min_value = $min_row->{$min_columns[$i]};
                 }
+
                 if ('asc' == $sort_orders[$i]) {
                     if ($current_value < $min_value) {
                         break;
@@ -205,15 +210,19 @@ class Pix_Array_Merger implements Iterator
     public function key()
     {
         $sort_values = array();
+
         foreach ($this->_getSortColumns($this->_current_pos) as $column) {
             $current = $this->_current;
+
             if (is_array($current)) {
                 $sort_values[] = urlencode($current[$column]);
             } else {
                 $sort_values[] = urlencode($current->$column);
             }
         }
+
         $sort_values[] = $this->_current_pos;
+
         return implode('&', $sort_values);
     }
 
