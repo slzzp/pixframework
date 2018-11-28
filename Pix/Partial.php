@@ -207,6 +207,7 @@ class Pix_Partial
             self::$_trim_mode ? 1 : 0,
             self::$_minify_mode ? 1 : 0
         );
+
         if (!self::$_nocache and !self::$_write_only_mode and strlen($cache_id) > 0 and $html = $cache->load($cache_key)) {
             return $html;
         }
@@ -234,6 +235,7 @@ class Pix_Partial
             $str = ob_get_clean();
         } catch (Exception $e) {
             ob_get_clean();
+
             throw $e;
         }
 
@@ -242,14 +244,18 @@ class Pix_Partial
         }
 
         $this->_data = $old_data;
+
         if (self::$_trim_mode) {
             $newstr = '';
+
             foreach (explode("\n", $str) as $line) {
                 $line = trim($line);
+
                 if (!empty($line)) {
                     $newstr .= $line . "\n";
                 }
             }
+
             $str = trim($newstr);
         }
 
@@ -345,6 +351,7 @@ class Pix_Partial
         if (is_null(self::$_helper_manager)) {
             self::$_helper_manager = new Pix_Helper_Manager();
         }
+
         return self::$_helper_manager;
     }
 
@@ -367,6 +374,7 @@ class Pix_Partial
     public function __call($func, $args)
     {
         array_unshift($args, $this);
+
         return self::getHelperManager()->callHelper($func, $args);
     }
 }

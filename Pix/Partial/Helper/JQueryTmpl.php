@@ -37,6 +37,7 @@ class Pix_Partial_Helper_JQueryTmpl extends Pix_Helper
             // jQuery Tmpl tag 部分
             $token = array();
             $token['text'] = $tag;
+
             if (preg_match('#^\${(.*)}$#', $tag, $m)) {
                 $token['type'] = 'variable';
                 $token['variable'] = $m[1];
@@ -54,6 +55,7 @@ class Pix_Partial_Helper_JQueryTmpl extends Pix_Helper
                     if ($tokens[$top]['type'] != 'if') {
                         throw new Exception("Parse error in offset {$offset}");
                     }
+
                     $tokens[$top]['else'] = count($tokens);
                 } elseif ('/if' == $command) {
                     $top = array_pop($stack);
@@ -62,10 +64,12 @@ class Pix_Partial_Helper_JQueryTmpl extends Pix_Helper
                     if ($tokens[$top]['type'] != 'if') {
                         throw new Exception("Parse error in offset {$offset}");
                     }
+
                     $tokens[$top]['endif'] = count($tokens);
                     array_pop($stack);
                 } elseif ('each' == $command) {
                     array_push($stack, count($tokens));
+
                     if (preg_match('#^\((.*),(.*)\) (.*)$#', trim($options), $matches)) {
                         $token['variable'] = trim($matches[3]);
                         $token['each_index'] = trim($matches[1]);
@@ -106,6 +110,7 @@ class Pix_Partial_Helper_JQueryTmpl extends Pix_Helper
         if ($stack) {
             throw new Exception("Parse tmpl failed on offset {$offset}");
         }
+
         // 剩下的部分
         $token = array();
         $token['text'] = substr($tmpl, $pointer);
@@ -119,6 +124,7 @@ class Pix_Partial_Helper_JQueryTmpl extends Pix_Helper
     protected function _printVariable($data, $var)
     {
         $t = $data;
+
         foreach (explode('.', $var) as $term) {
             if (is_array($t)) {
                 $t = $t[$term];
@@ -126,6 +132,7 @@ class Pix_Partial_Helper_JQueryTmpl extends Pix_Helper
                 $t = $t->{$term};
             }
         }
+
         return htmlspecialchars($t);
     }
 
@@ -133,13 +140,14 @@ class Pix_Partial_Helper_JQueryTmpl extends Pix_Helper
     {
         for ($i = $start; $i < $end; $i ++) {
             $token = $tokens[$i];
+
             if ($token['type'] == 'text') {
-                echo $token['text'];
+                echo($token['text']);
                 continue;
             }
 
             if ($token['type'] == 'variable') {
-                echo $this->_printVariable($data, $token['variable']);
+                echo($this->_printVariable($data, $token['variable']));
                 continue;
             }
 
@@ -149,8 +157,10 @@ class Pix_Partial_Helper_JQueryTmpl extends Pix_Helper
                     $new_data->{$token['each_index']} = $index;
                     $new_data->{$token['each_value']} = $value;
                     $this->_walkToken($tokens, $i + 1, $token['match'], $new_data);
+
                     unset($new_data);
                 }
+
                 $i = $token['match'];
                 continue;
             }
@@ -172,10 +182,13 @@ class Pix_Partial_Helper_JQueryTmpl extends Pix_Helper
         } else {
             $path = $path;
         }
+
         ob_start();
-        echo '<script id="', htmlspecialchars($id), '" type="text/html">';
-        echo file_get_contents($path);
-        echo '</script>';
+
+        echo('<script id="', htmlspecialchars($id), '" type="text/html">');
+        echo(file_get_contents($path));
+        echo('</script>');
+
         return ob_get_clean();
     }
 }

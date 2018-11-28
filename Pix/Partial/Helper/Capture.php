@@ -24,6 +24,7 @@ class Pix_Partial_Helper_Capture extends Pix_Helper
         if (!isset($this->_capture_data[$name])) {
             $this->_capture_data[$name] = '';
         }
+
         $this->_capture_data[$name] .= ob_get_clean();
     }
 
