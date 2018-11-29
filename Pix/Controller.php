@@ -246,7 +246,7 @@ class Pix_Controller
 
             if (!class_exists($className, false)) {
                 if (file_exists($file)) {
-                    include($file);
+                    include $file;
                 } else {
                     throw new Pix_Controller_Dispatcher_Exception('404 Controller file not found: ' . $file);
                 }
@@ -283,7 +283,7 @@ class Pix_Controller
             // no view, do nothing
         } catch (Exception $exception) {
             if (file_exists($baseDir . '/controllers/ErrorController.php')) {
-                include($baseDir . '/controllers/ErrorController.php');
+                include $baseDir . '/controllers/ErrorController.php';
 
                 $controller = new ErrorController();
                 $controller->view->setPath("$baseDir/views/");
