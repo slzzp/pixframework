@@ -222,14 +222,17 @@ class Pix_Partial
             if (!file_exists($path)) {
                 throw new Exception("找不到 {$path} 這個路徑的 partial");
             }
+
             if (preg_match('#.tmpl$#', $path)) {
                 $this->jQueryTmpl($path, $this);
             } else {
                 require($path);
             }
+
             $str = ob_get_clean();
         } catch (Pix_Partial_NoRender $e) {
             ob_get_clean();
+
             $str = '';
         } catch (Pix_Partial_BreakRender $e) {
             $str = ob_get_clean();
@@ -368,6 +371,7 @@ class Pix_Partial
     public static function addHelper($helper, $methods = null, $options = array())
     {
         $manager = self::getHelperManager();
+
         $manager->addHelper($helper, $methods, $options);
     }
 
