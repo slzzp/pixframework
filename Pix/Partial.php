@@ -226,7 +226,7 @@ class Pix_Partial
             if (preg_match('#.tmpl$#', $path)) {
                 $this->jQueryTmpl($path, $this);
             } else {
-                require($path);
+                require $path;
             }
 
             $str = ob_get_clean();
