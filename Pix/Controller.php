@@ -90,7 +90,7 @@ class Pix_Controller
      */
     public function redraw($partial_name)
     {
-        echo $this->draw($partial_name);
+        echo($this->draw($partial_name));
 
         return $this->noview();
     }
@@ -273,8 +273,9 @@ class Pix_Controller
             $controller->{$controller->actionName . 'Action'}($params);
 
             $file = $controller->view->getPath() . "$controllerName/$controller->actionName.phtml";
+
             if (file_exists($file)) {
-                echo $controller->draw("$controllerName/$controller->actionName.phtml");
+                echo($controller->draw("$controllerName/$controller->actionName.phtml"));
             } else {
                 throw new Pix_Controller_Dispatcher_Exception("404 View file not found!");
             }
@@ -283,6 +284,7 @@ class Pix_Controller
         } catch (Exception $exception) {
             if (file_exists($baseDir . '/controllers/ErrorController.php')) {
                 include($baseDir . '/controllers/ErrorController.php');
+
                 $controller = new ErrorController();
                 $controller->view->setPath("$baseDir/views/");
             } else {
@@ -291,12 +293,15 @@ class Pix_Controller
             }
 
             $controller->view->exception = $exception;
+
             try {
                 $controller->init($params);
                 $controller->errorAction($params);
+
                 $file = $controller->view->getPath() . "error/error.phtml";
+
                 if (file_exists($file)) {
-                    echo $controller->draw("error/error.phtml");
+                    echo($controller->draw("error/error.phtml"));
                 }
             } catch (Pix_Controller_NoViewException $exception) {
                 // no view, do nothing

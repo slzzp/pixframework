@@ -28,8 +28,10 @@ class Pix_Prompt
             return readline($prompt);
         } else {
             $fp = fopen('php://stdin', 'r');
-            echo $prompt;
+
+            echo($prompt);
             $line = fgets($fp);
+
             fclose($fp);
 
             return $line;
@@ -79,10 +81,10 @@ class Pix_Prompt
 
             try {
                 eval(self::$__l . ";");
-                echo "\n";
+                echo("\n");
             } catch (Exception $e) {
-                echo $e->getMessage() . "\n";
-                echo $e->getTraceAsString() . "\n";
+                echo($e->getMessage() . "\n");
+                echo($e->getTraceAsString() . "\n");
             }
 
             self::$_vars = get_defined_vars();

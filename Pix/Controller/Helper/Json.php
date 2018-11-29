@@ -23,7 +23,7 @@ class Pix_Controller_Helper_Json extends Pix_Helper
     {
         header('Content-Type: application/json');
 
-        echo @json_encode($obj);
+        echo(@json_encode($obj));
 
         return $controller->noview();
     }
@@ -36,7 +36,7 @@ class Pix_Controller_Helper_Json extends Pix_Helper
             return $controller->json($obj);
         }
 
-        echo $callback . '(' . @json_encode($obj) . ')';
+        echo($callback . '(' . @json_encode($obj) . ')');
 
         return $controller->noview();
     }
