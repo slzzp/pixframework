@@ -12,6 +12,7 @@ class Pix_Controller
     protected static $_dispatchers = array();
 
     public $view = null;
+    protected $versionName = '';
     protected $controllerName = 'index';
     protected $actionName = 'index';
 
@@ -45,6 +46,17 @@ class Pix_Controller
     public function setView($v)
     {
         $this->view = $v;
+    }
+
+    /**
+     * getVersionName get Version name
+     *
+     * @access public
+     * @return string
+     */
+    public function getVersionName()
+    {
+        return $this->versionName;
     }
 
     /**
@@ -212,9 +224,28 @@ class Pix_Controller
     public static function dispatch($data_path)
     {
         $baseDir = rtrim($data_path, '/');
+        $versionName = '';
         $controllerName = null;
 
         list($uri, $params) = array_pad(explode('?', $_SERVER['REQUEST_URI'], 2), 2, null);
+
+        /**
+         * Parse versionName first, rest for controllerName/actionName
+         *
+         * Support Versioned URL:
+         * - http://hostname/v1
+         * - http://hostname/v1/
+         * - http://hostname/v1/controller
+         *
+         * Original URL:
+         * - http://hostname/
+         * - http://hostname/controller
+         */
+        if (preg_match('/^\/(v[0-9]+)\/*/', $uri, $matches)) {
+            $versionName = $matches[1];
+            $uri = substr($uri, strlen($versionName) + 1);
+        }
+
         // dispatch
         foreach (self::$_dispatchers as $dispatcher) {
             if (is_callable($dispatcher)) {
@@ -232,6 +263,12 @@ class Pix_Controller
 
         if (is_null($controllerName) or is_null($actionName)) {
             list($uri, $params) = array_pad(explode('?', $_SERVER['REQUEST_URI'], 2), 2, null);
+
+            if (preg_match('/^\/(v[0-9]+)\/*/', $uri, $matches)) {
+                $versionName = $matches[1];
+                $uri = substr($uri, strlen($versionName) + 1);
+            }
+
             $default_dispatcher = new Pix_Controller_Dispatcher_Default();
             list($controllerName, $actionName, $params) = $default_dispatcher->dispatch($uri);
         }
@@ -242,7 +279,7 @@ class Pix_Controller
             }
 
             $className = ucfirst($controllerName) . 'Controller';
-            $file = $baseDir . '/controllers/' . $className . '.php';
+            $file = $baseDir . '/controllers' . ('' === $versionName ? '' : '_' . $versionName) . '/' . $className . '.php';
 
             if (!class_exists($className, false)) {
                 if (file_exists($file)) {
@@ -257,9 +294,10 @@ class Pix_Controller
             }
 
             $controller = new $className();
+            $controller->versionName = $versionName;
             $controller->controllerName = $controllerName;
             $controller->actionName = $actionName;
-            $controller->view->setPath("$baseDir/views/");
+            $controller->view->setPath($baseDir . '/views' . ('' === $versionName ? '' : '_' . $versionName) . '/');
             $controller->init($params);
 
             if (is_null($controller->actionName)) {
