@@ -146,7 +146,7 @@ class Pix_Controller
     public static function addDispatcher($dispatcher)
     {
         if (!($dispatcher instanceof Pix_Controller_Dispatcher ) and !is_callable($dispatcher)) {
-            throw new Exception("addDispatcher 只能指定 Pix_Controller_Dispatcher & callable function");
+            throw new Exception('addDispatcher 只能指定 Pix_Controller_Dispatcher & callable function');
         }
 
         self::$_dispatchers[] = $dispatcher;
@@ -310,12 +310,12 @@ class Pix_Controller
 
             $controller->{$controller->actionName . 'Action'}($params);
 
-            $file = $controller->view->getPath() . "$controllerName/$controller->actionName.phtml";
+            $file = $controller->view->getPath() . $controllerName . '/' . $controller->actionName . '.phtml';
 
             if (file_exists($file)) {
-                echo($controller->draw("$controllerName/$controller->actionName.phtml"));
+                echo($controller->draw($controllerName . '/' . $controller->actionName . '.phtml'));
             } else {
-                throw new Pix_Controller_Dispatcher_Exception("404 View file not found!");
+                throw new Pix_Controller_Dispatcher_Exception('404 View file not found!');
             }
         } catch (Pix_Controller_NoViewException $exception) {
             // no view, do nothing
@@ -324,7 +324,7 @@ class Pix_Controller
                 include $baseDir . '/controllers/ErrorController.php';
 
                 $controller = new ErrorController();
-                $controller->view->setPath("$baseDir/views/");
+                $controller->view->setPath($baseDir . '/views/');
             } else {
                 $controller = new Pix_Controller_DefaultErrorController();
                 $controller->view->setPath(__DIR__ . '/Controller/DefaultErrorController/views');
@@ -336,10 +336,10 @@ class Pix_Controller
                 $controller->init($params);
                 $controller->errorAction($params);
 
-                $file = $controller->view->getPath() . "error/error.phtml";
+                $file = $controller->view->getPath() . 'error/error.phtml';
 
                 if (file_exists($file)) {
-                    echo($controller->draw("error/error.phtml"));
+                    echo($controller->draw('error/error.phtml'));
                 }
             } catch (Pix_Controller_NoViewException $exception) {
                 // no view, do nothing
