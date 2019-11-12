@@ -28,10 +28,8 @@ class Pix_Prompt
             return readline($prompt);
         } else {
             $fp = fopen('php://stdin', 'r');
-
             echo($prompt);
             $line = fgets($fp);
-
             fclose($fp);
 
             return $line;

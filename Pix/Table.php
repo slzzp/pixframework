@@ -545,6 +545,7 @@ abstract class Pix_Table
             $primary_value = array($primary_value);
         }
 
+        // if cache has data, return data from cache.
         if (false !== ($row = $table->getRowFromCache($primary_value))) {
             return $row;
         }
@@ -552,8 +553,10 @@ abstract class Pix_Table
         $conf = array();
         $conf['tableClass'] = $table->getClass();
 
+        // if no data, clean cache, return null.
         if (!$row = $table->getDb()->fetchOne($table, $primary_value)) {
             $table->cacheRow($primary_value, null);
+
             return null;
         }
 
@@ -631,7 +634,10 @@ abstract class Pix_Table
         $row = $table->createRow();
 
         foreach ($data as $column => $value) {
-            if (isset($table->_columns[$column]) or isset($table->_relations[$column]) or ('_' == $column[0]) or isset($table->_hooks[$column]['set'])) {
+            if (isset($table->_columns[$column]) or
+                isset($table->_relations[$column]) or
+                '_' == $column[0] or
+                isset($table->_hooks[$column]['set'])) {
                 $row->{$column} = $value;
             }
         }
@@ -659,7 +665,9 @@ abstract class Pix_Table
      */
     public function isNumbericColumn($column)
     {
-        if (is_scalar($column) and isset($this->_columns[$column]['type']) and in_array($this->_columns[$column]['type'], array('int', 'tinyint'))) {
+        if (is_scalar($column) and
+            isset($this->_columns[$column]['type']) and
+            in_array($this->_columns[$column]['type'], array('int', 'tinyint'))) {
             return true;
         }
 

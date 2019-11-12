@@ -26,7 +26,7 @@ class Pix_Table_Db_Adapter_PgSQL extends Pix_Table_Db_Adapter_SQL
             }
         }
 
-        $this->_pdo = new PDO("pgsql:" . implode(';', $config));
+        $this->_pdo = new PDO('pgsql:' . implode(';', $config));
     }
 
     public function getSQLConditionByTerm(Pix_Table_Search_Term $term, $table = null)
@@ -38,7 +38,7 @@ class Pix_Table_Db_Adapter_PgSQL extends Pix_Table_Db_Adapter_SQL
                 $latlon = $arguments[1];
                 $distance = $arguments[2];
 
-                return "ST_DWithin(" . $this->column_quote($column) . ", ST_GeographyFromText('POINT(" . floatval($latlon[1]) . " " . floatval($latlon[0]) . ")'), " . intval($distance) . ")";
+                return 'ST_DWithin(' . $this->column_quote($column) . ", ST_GeographyFromText('POINT(" . floatval($latlon[1]) . ' ' . floatval($latlon[0]) . ")'), " . intval($distance) . ')';
         }
 
         throw new Pix_Table_Exception('Unsupport Pix_Table_Search_Term: ' . $term->getType());
@@ -109,7 +109,7 @@ class Pix_Table_Db_Adapter_PgSQL extends Pix_Table_Db_Adapter_SQL
      */
     public function createTable($table)
     {
-        $sql = "CREATE TABLE \"" . $table->getTableName() . '"';
+        $sql = 'CREATE TABLE "' . $table->getTableName() . '"';
         $types = array('bigint', 'tinyint', 'int', 'varchar', 'char', 'text', 'float', 'double', 'binary', 'geography');
         $primarys = is_array($table->_primary) ? $table->_primary : array($table->_primary);
         $pk_isseted = false;
@@ -136,6 +136,7 @@ class Pix_Table_Db_Adapter_PgSQL extends Pix_Table_Db_Adapter_SQL
                     $type = 'POINT';
                     $srid = 0;
                 }
+
                 $s .= 'geography(' . $type . ',' . $srid . ')';
             } else {
                 $s .= strtoupper($db_type);
@@ -211,7 +212,7 @@ class Pix_Table_Db_Adapter_PgSQL extends Pix_Table_Db_Adapter_SQL
             throw new Pix_Table_Exception("要 DROP TABLE 前請加上 Pix_Setting::set('Table:DropTableEnable', true);");
         }
 
-        $sql = "DROP TABLE \""  . $table->getTableName() . '"';
+        $sql = 'DROP TABLE "'  . $table->getTableName() . '"';
 
         return $this->query($sql, $table);
     }

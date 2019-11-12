@@ -17,6 +17,7 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
     {
         throw new Exception("不知名的 column: {$name}");
     }
+
     public function __construct($config)
     {
         $this->_config = $config;
@@ -132,7 +133,7 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
 
         if (Pix_Setting::get('Table:ExplainFileSortEnable')) {
             if (preg_match('#^SELECT #', strtoupper($sql))) {
-                $res = $this->_getLink($type)->query("EXPLAIN $sql");
+                $res = $this->_getLink($type)->query('EXPLAIN ' . $sql);
                 $row = $res->fetch_assoc();
 
                 if (preg_match('#Using filesort#', $row['Extra'])) {
@@ -184,7 +185,7 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
 
                         case 2006: // MySQL server gone away
                         case 2013: // Lost connection to MySQL server during query
-                            trigger_error("Pix_Table " . $message, E_USER_WARNING);
+                            trigger_error('Pix_Table ' . $message, E_USER_WARNING);
                             $this->resetConnect();
 
                             continue 2;
@@ -206,14 +207,14 @@ class Pix_Table_Db_Adapter_MysqlConf extends Pix_Table_Db_Adapter_MysqlCommon
                         throw new Pix_Table_IncorrectStringException($e->message);
                     }
 
-                    trigger_error("Pix_Table " . (is_null($table) ? '' : "Table: {$table->getClass()}") . "SQL Warning: ({$e->errno}){$e->message} " . substr($sql, 0, 128), E_USER_WARNING);
+                    trigger_error('Pix_Table ' . (is_null($table) ? '' : "Table: {$table->getClass()}") . "SQL Warning: ({$e->errno}){$e->message} " . substr($sql, 0, 128), E_USER_WARNING);
                 } while ($e->next());
             }
 
             return $res;
         }
 
-        throw new Pix_Table_Exception("query 三次失敗");
+        throw new Pix_Table_Exception('query 三次失敗');
     }
 
     public function getLastInsertId($table = null)
