@@ -31,7 +31,7 @@ class Pix_Table_Db_Adapter_MsSQL extends Pix_Table_Db_Adapter_MysqlCommon
      */
     public function query($sql, $table = null)
     {
-        if (Pix_Table::$_log_groups[Pix_Table::LOG_QUERY]) {
+        if (isset(Pix_Table::$_log_groups[Pix_Table::LOG_QUERY]) && Pix_Table::$_log_groups[Pix_Table::LOG_QUERY]) {
             Pix_Table::debug(sprintf("[%s]\t%40s", strval($this->_link), $sql));
         }
 

@@ -32,7 +32,7 @@ class Pix_Table_Db_Adapter_Sqlite extends Pix_Table_Db_Adapter_SQL
 
     public function query($sql)
     {
-        if (Pix_Table::$_log_groups[Pix_Table::LOG_QUERY]) {
+        if (isset(Pix_Table::$_log_groups[Pix_Table::LOG_QUERY]) && Pix_Table::$_log_groups[Pix_Table::LOG_QUERY]) {
             Pix_Table::debug(sprintf("[%s]\t%40s", $this->_path . $this->_name, $sql));
         }
 
